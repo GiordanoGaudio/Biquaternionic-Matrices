@@ -165,14 +165,27 @@ def disp(q):
 """
     
     
-def quaternize(a,b):
-  stringvec = ''
-  for i in range(4):
-    stringvec = stringvec + (a + "_{" + str(i) + "} " + b + "_{" + str(i) + "} ")        # Creates a string of "a_0 b_0 ... a_3 b_3"
-  q0, p0, q1, p1, q2, p2, q3, p3 = symbols(stringvec, real = True)                                    # Converts these into sympy Symbols
-  return qt.Quaternion(q0 + p0*I,q1 + p1*I,q2 + p2*I,q3 + p3*I)                          # makes of them a biquaternion
-
-
+def quaternize(a,b, complex_condition = '', quaternionic_condition = ''):
+    stringvec = ''
+    for i in range(4):
+        stringvec = stringvec + (a + "_{" + str(i) + "} " + b + "_{" + str(i) + "} ")        # Creates a string of "a_0 b_0 ... a_3 b_3"
+    q0, p0, q1, p1, q2, p2, q3, p3 = symbols(stringvec, real = True)                         # Converts these into sympy Symbols
+      
+    if complex_condition == '' and quaternionic_condition == '':
+        return qt.Quaternion(q0 + p0*I,q1 + p1*I,q2 + p2*I,q3 + p3*I)        # makes of them a biquaternion
+    elif complex_condition == 'real' and quaternionic_condition == '':
+        return qt.Quaternion(q0, q1,q2,q3)
+    elif complex_condition == 'imaginary'  and quaternionic_condition == '':
+        return qt.Quaternion(p0*I, p1*I,p2*I,p3*I)
+    elif complex_condition == 'real' and quaternionic_condition == 'real':
+        return qt.Quaternion(q0,0,0,0)
+    elif complex_condition == 'imaginary' and quaternionic_condition == 'real':
+        return qt.Quaternion(p0*I, 0,0,0)
+    elif complex_condition == 'real' and quaternionic_condition == 'imaginary':
+        return qt.Quaternion(0,q1,q2,q3)
+    elif complex_condition == 'imaginary'  and quaternionic_condition == 'imaginary':
+        return qt.Quaternion(0, p1*I,p2*I,p3*I)       
+    else: pass
 
 """
 
@@ -193,6 +206,7 @@ def quaternize(a,b):
       Where qij is a biquaternion so defined with the qt.Quaternion method.
       
 """
+
 
 
 class BQ_Matrix:
@@ -236,7 +250,7 @@ class BQ_Matrix:
         
     def show(self):
         return Matrix([[disp(self.q00), disp(self.q01)],
-                      [disp(self.q10), disp(self.q11)]])
+                       [disp(self.q10), disp(self.q11)]])
                       
     """
     
@@ -283,9 +297,11 @@ class BQ_Matrix:
     """    
     
     def dot(self, P):
-        qp00, qp10 = self.q00*P.q00 + self.q01*P.q10, self.q00*P.q01 + self.q01*P.q11
-        qp01, qp11 = self.q10*P.q00 + self.q11*P.q10, self.q10*P.q01 + self.q11*P.q11
-        return Q(simplify(qp00), simplify(qp10),simplify(qp01), simplify(qp11))
+        qp00 = self.q00*P.q00 + self.q01*P.q10
+        qp01 = self.q00*P.q01 + self.q01*P.q11
+        qp10 = self.q10*P.q00 + self.q11*P.q10
+        qp11 = self.q10*P.q01 + self.q11*P.q11
+        return BQ_Matrix(qp00,qp01,qp10, qp11)
     
     """
 
@@ -306,6 +322,14 @@ class BQ_Matrix:
     def anticommutator(self, P):
         return self.dot(P).add(P.dot(self))
     
+    def power(self, n):
+        K = BQ_Matrix(I, Z, Z, I)
+        if n == 0: return K
+        else:
+            for i in range(1, n+1):
+                K = K.dot(self)
+            return K
+ 
 
 
     """
@@ -360,6 +384,7 @@ class BQ_Matrix:
     """
     
         Conjugates and Daggers
+
         ----------------------
         
         For each of the conjugations defined, there is a kind of hermitian conjugation of the matrix
@@ -384,19 +409,18 @@ class BQ_Matrix:
     
     """   
         
-    def ize(w,x,y,z):
+    def ize(w,x,y,z, complex_condition = '', quaternionic_condition =  ''):
         stringvec = ''
-        for A in ['a', 'b', 'c', 'd']:
+        for A in [w, x, y, z]:
             stringvec = stringvec + (A + "^{re} ")
-        for A in ['a', 'b', 'c', 'd']:
+        for A in [w, x, y, z]:
             stringvec = stringvec + (A + "^{im} ")
         w0,x0,y0,z0,w1,x1,y1,z1, dump = stringvec.split(' ')
         
-        W = quaternize(w0,w1)
-        X = quaternize(x0,x1)
-        Y = quaternize(y0,y1)
-        Z = quaternize(z0,z1)
+        q00 = quaternize(w0,w1,complex_condition, quaternionic_condition)
+        q01 = quaternize(x0,x1,complex_condition, quaternionic_condition)
+        q10 = quaternize(y0,y1,complex_condition, quaternionic_condition)
+        q11 = quaternize(z0,z1,complex_condition, quaternionic_condition)
         
-        
-        return BQ_Matrix(W,X,Y,Z)
+        return BQ_Matrix(q00,q01,q10,q11)
   
