@@ -5,5 +5,5 @@ A biquaternion (https://en.wikipedia.org/wiki/Biquaternion) is a quaternion Q = 
 where the coefficients w,x,y,z are complex numbers  (and commute with I,J,K). 
 
 During my 2021 research in Clifford algebras I found it necessary to run calculations with matrices of biquaternions, both symbolically and numerically.
-While I could do these by hand, the noncommutative nature of the Biquaternions would make these calculations difficult. 
+While I could do these by hand, the noncommutative nature of the Biquaternions $\mathbb{B}$ would make these calculations difficult. 
 So I decided to create some methods and a class to help me with these kinds of calculations.
