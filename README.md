@@ -14,5 +14,7 @@ from BiquaternionicMatrix import *
 
 
 Goals:
+
 -Matrix exponentiation
+
 -Impliment larger matrices as an option?
