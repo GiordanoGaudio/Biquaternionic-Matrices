@@ -13,8 +13,7 @@ Note: since this code heavilyuses  sympy, it is best implemented in Jupyter. I r
 from BiquaternionicMatrix import *
 
 
-Goals:
+Future Goals:
 
 -Matrix exponentiation
-
 -Impliment larger matrices as an option?
